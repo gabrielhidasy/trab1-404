@@ -1,4 +1,5 @@
 #include "main.h"
+#include <ctype.h>
 int main(int argc, char *argv[]) {
   if(argc!=3) {
     printf("Entrada Invalida\n");
@@ -23,8 +24,6 @@ int main(int argc, char *argv[]) {
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   while(1) {
     printf("%s\n",l->tokenname);
-    /* if(pc.side==0) */
-    /*   fprintf(hexa,"%03x ",pc.position); */
     if(!strcmp(l->tokenname,".align")) {
       if(pc.side==1) {
 	pc.position++;
@@ -41,9 +40,6 @@ int main(int argc, char *argv[]) {
       continue;
     }
     if(!strcmp(l->tokenname,".word")) {
-      //char palavra[11];
-      //int count=0,count2=0;
-      //memset(palavra,'0',10);
       fprintf(hexa,"%03x ",pc.position);
       l=l->prox;
       fprintf(hexa,"%s\n",l->tokenname);
@@ -53,38 +49,57 @@ int main(int argc, char *argv[]) {
 	l=l->prox;
       continue;
     }
-    if(!strcmp(l->tokenname,"ADD")) { //as funções desse tipo vão ser coxas
-      if(pc.side==0) pc.side=1;
+    if(!strcmp(l->tokenname,".org")) {
+      printf("mudando origem de %d\n",pc.position);
+      l=l->prox;
+      printf("para %s\n",l->tokenname);
+      pc.position=strtol(l->tokenname,NULL,16);
+      if(l->prox!=NULL)
+	l=l->prox;
+      continue;
+    }
+    if(!strcmp(l->tokenname,".wfill")) {
+      l=l->prox;
+      int linhas = strtol(l->tokenname,NULL,16);
+      l=l->prox;
+      int count = 0;
+      for(count=0;count<linhas;count++) {
+	fprintf(hexa,"%03x ",pc.position);
+	fprintf(hexa,"%s\n",l->tokenname);
+	pc.position++;
+	pc.side=0;
+      }
+      if(l->prox!=NULL)
+	l=l->prox;
+      continue;
+    }
+    if(!strcmp(l->tokenname,"add")) {
+      //int count=0;
+      if(pc.side==0) {
+	pc.side=1;
+	fprintf(hexa,"\n%03x ",pc.position);
+      }
+      else {
+       pc.side=0;
+	pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"05%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
+    if(!strcmp(l->tokenname,"sub")) { //as funções desse tipo vão ser coxas
+      //int count=0;
+      if(pc.side==0) {
+	pc.side=1;
+	fprintf(hexa,"\n%03x ",pc.position);
+      }
       else {
 	pc.side=0;
 	pc.position++;
       }
-      fprintf(hexa,"\n%03x ",pc.position);
       l=l->prox;
-      fprintf(hexa,"05");
-      //aqui tem que colocar pra interpretar o proximo token
-    }
-    if(l->tokenname[0]=='M' && l->tokenname[1]=='(') {
-      int count=0,count2=2;
-      char *tmptoken;
-      tmptoken = malloc(sizeof(char)*50);
-      while(l->tokenname[count2]!=')') {
-	tmptoken[count]=l->tokenname[count2];
-	count++;
-	count2++;
-      }
-      //em temptoken temos uma constante
-      //pode ser binaria, hexa, dec, octa
-      //temos tratadores para todas
-      tmptoken[count]='\0';
-      tmptoken=trata_constante(tmptoken);
-      count=0;
-      while(tmptoken[count]!='\0') {
-	count++;
-      }
-      count--;
-      fprintf(hexa,"%c%c%c",tmptoken[count-2],tmptoken[count-1],tmptoken[count]);
-      //printf("%c%c%c",tmptoken[count-2],tmptoken[count-1],tmptoken[count]);
+      fprintf(hexa,"06%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
     }
     if(l->prox!=NULL)
       l=l->prox;
@@ -146,17 +161,23 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   l->prox=NULL;
   auxlist = l;
   int i=0,y=0;
-  char *temptoken;
+  char *temptoken,*auxtoken;
   temptoken = malloc(sizeof(char)*50);
+  auxtoken = malloc(sizeof(char)*50);
   memset(temptoken,'0',50);
+  memset(auxtoken,'0',50);
   //printf("%s",code);
   while(code[i]!='\0') {
-    temptoken[y]=code[i]; i++; y++;
-    if(code[i]==' ' || code[i]=='\0') {
+    temptoken[y]=tolower(code[i]); i++; y++;
+    if(code[i]==' ' || code[i]==',' || code[i]=='\0') {
       temptoken[y] = '\0';
-      //O trecho abaixo transforma todas as constantes em hexa
-      temptoken = trata_constante(temptoken);
-      //fim do trecho
+      strcpy(auxtoken,temptoken);
+      temptoken = trata_constante(temptoken); //constantes em hexa
+      if(!strcmp(temptoken,auxtoken))
+	l->tokentype='d';
+      else
+	l->tokentype = 'c';
+	 
       y=0; i++;
       //printf("Adicionando token --%s-- a lista\n",temptoken);
       //adiciona o token a lista
@@ -206,7 +227,34 @@ char *trata_constante(char *temptoken) {
   }
   return temptoken;
 }
-  
+char *trataM(char *in) {
+  if(in[0]=='m' && in[1]=='(') {
+    int count=0,count2=2;
+    char *tmptoken,saida[3];
+    tmptoken = malloc(sizeof(char)*50);
+    while(in[count2]!=')') {
+      tmptoken[count]=in[count2];
+      count++;
+      count2++;
+    }
+    //em temptoken temos uma constante
+    //pode ser binaria, hexa, dec, octa
+    //temos tratadores para todas
+    tmptoken[count]='\0';
+    tmptoken=trata_constante(tmptoken);
+    count=0;
+    while(tmptoken[count]!='\0') {
+      count++;
+    }
+    count--;
+    sprintf(saida,"%c%c%c",tmptoken[count-2],tmptoken[count-1],tmptoken[count]);
+    memset(in,'0',50);
+    strcpy(in,saida);
+    return in;
+  } 
+  //else erro no codigo
+  return NULL;
+}
 void erro(int err) {
   printf("Erro de sintaxe proximo a linha %d",err);
   exit(1);

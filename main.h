@@ -12,6 +12,7 @@ typedef struct liste {
 } list;
 typedef struct ltokens {
   char tokenname[50];
+  char tokentype;
   struct ltokens *prox;
 } listtokens;
 void erro(int err);
@@ -22,3 +23,4 @@ char *trata_constante(char *temptoken);
 char *trata0x(char *in);
 char *trata0o(char *in); 
 char *trata0b(char *in);
+char *trataM(char *in);
