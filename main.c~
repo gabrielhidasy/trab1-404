@@ -87,6 +87,20 @@ int main(int argc, char *argv[]) {
       fprintf(hexa,"05%s",trataM(l->tokenname)); 
       if(pc.side==0) fprintf(hexa,"\n");
     }
+    if(!strcmp(l->tokenname,"addmod")) {
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+       pc.side=0;
+			 pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"07%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
     if(!strcmp(l->tokenname,"sub")) { 
       //int count=0;
       if(pc.side==0) {
@@ -101,6 +115,20 @@ int main(int argc, char *argv[]) {
       fprintf(hexa,"06%s",trataM(l->tokenname)); 
       if(pc.side==0) fprintf(hexa,"\n");
     }
+    if(!strcmp(l->tokenname,"submod")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"08%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
     if(!strcmp(l->tokenname,"mul")) { 
       //int count=0;
       if(pc.side==0) {
@@ -113,6 +141,62 @@ int main(int argc, char *argv[]) {
       }
       l=l->prox;
       fprintf(hexa,"0B%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
+    if(!strcmp(l->tokenname,"div")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"0C%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
+    if(!strcmp(l->tokenname,"load")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"01%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
+    if(!strcmp(l->tokenname,"loadmq")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"0A%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
+    if(!strcmp(l->tokenname,"stor")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"21%s",trataM(l->tokenname)); 
       if(pc.side==0) fprintf(hexa,"\n");
     }
     if(l->prox!=NULL)
