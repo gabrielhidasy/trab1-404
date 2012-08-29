@@ -1,0 +1,77 @@
+void mount(FILE *codigo, FILE *hexa, struct pcounter pc) {
+}
+short isLabel(char line[100]) {
+  int i;
+  for(i=0;i<100;i++) {
+    if(line[i]==':')
+      return 1;
+  }
+  return 0;
+}
+void addLabel(char line[100], struct pcounter pc, list *lista) {
+  if(lista==NULL) 
+    lista = malloc(sizeof(list));
+  else {
+    while(lista->prox!=NULL) {
+      lista=lista->prox;
+    }
+    lista->prox=malloc(sizeof(list));
+    lista = lista->prox;
+  }
+  lista->name=malloc(sizeof(char)*100);
+  lista->name=line;
+  lista->pos=pc;
+  return;
+}
+int isDiretiva(char line[100]) {
+  if(line[0]=='.')
+    return 1;
+  else 
+    return 0;
+}
+void executadiretiva(char line[100]) {
+  if(strcmp
+}
+void labelizer(FILE *codigo, struct pcounter pc, list *listlabels) {
+  char line[100];
+  fscanf(codigo,"%s",line);
+  if(isLabel(line)) {
+    addLabel(line,pc,listlabels);
+  }
+  else {
+    if(isDiretiva) {
+      executadiretiva(line);
+    //avança o pc
+    if(pc.side==0) pc.side=1;
+    else {
+      pc.position++;
+      pc.side=0;
+    }
+  }
+}
+void lables(FILE *codigo, struct pcount pc, list lista) {
+  char line[100],auxline[20];
+  while(1) {
+    fscanf(codigo,"%s",line);
+    for(i=0;i<100;i++) {
+      if(line[i]=='.') {
+	switch (line[i+1]) {
+	case o:
+	  i = i + 4
+	case a:
+	  //tratar alig
+	case w:
+	  if(line[i+2]=='f') {
+	    //tratar wfill
+	  }
+	  else {
+	    //tratar .word
+	  }
+	case s:
+	  //tratar .s
+	default:
+	  erro(4); //acertar a linha aqui
+	}
+	}	  
+      }
+    }  

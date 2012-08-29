@@ -1,0 +1,21 @@
+SRC = $(wildcard *.c)
+ASRC = $(SRC:.c=.s)
+OBJ = $(SRC:.c=.o)
+CFLAGS = -Wall -ansi -S -O2 -g -std=c99 -Wall -lm
+OUTPUT = binary
+CC = gcc
+all: linker	
+clean:
+	@rm -rf *.o *.s *.zip
+%.o : %.s  
+	@as $< -o $@
+%.s : %.c
+	@$(CC) $(CFLAGS) $< -o $@ 
+object: assembly
+	@make $(OBJ) 
+assembly: 
+	@make $(ASRC)
+linker: object
+	@ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib64/crt1.o /usr/lib64/crti.o -L /usr/lib64 $(OBJ) -lc /usr/lib64/crtn.o -o $(OUTPUT)
+zip: 
+	@zip fonte.zip *.c *.h

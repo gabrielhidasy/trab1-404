@@ -1,0 +1,16 @@
+struct pcounter {
+  int position;
+  int side;
+};
+typedef struct liste {
+  struct pcounter pos;
+  char *name;
+  struct liste *prox;
+} list;
+typedef struct ltokens {
+  char tokenname[20];
+  struct ltokens *prox;
+} listtokens;
+void erro(int err);
+void tokenizer(FILE *codigo,listtokens *l);
+void remove_coments(FILE *cod, FILE *temp);

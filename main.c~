@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "main.h"
+int main(int argc, char *argv[]) {
+  if(argc!=3) {
+    printf("Entrada Invalida\n");
+    return -1;
+  }
+  FILE *codigo;
+  FILE *hexa;
+  FILE *temp;
+  listtokens *l;
+  struct pcounter pc;
+  l = malloc(sizeof(listtokens));
+  codigo=fopen(argv[1],"r+");
+  if(codigo==NULL) {
+    printf("Arquivo de entrada não existe\n");
+    return -2;
+  }
+  temp=fopen("tempfile","w+");
+  remove_coments(codigo,temp);
+  fclose(codigo);
+  codigo = temp;
+  hexa=fopen(argv[2],"w+");
+  tokenizer(codigo,l,pc);
+
+  pc.position=0;
+  pc.side=0;
+  fclose(hexa);
+  fclose(codigo);
+  return 0;
+  
+}
+void remove_coments(FILE *cod, FILE *temp) { //OK
+  int i;
+  int cond = 1;
+  char aux = 0;
+  while(!feof(cod)) {
+    cond=fscanf(cod,"%c",&aux);
+    if(aux=='@') {
+      while(aux!='\n') {
+	fscanf(cod,"%c",&aux);
+      } 
+    }
+    fprintf(temp,"%c",aux);
+  }
+}       
+  
+void tokenizer(FILE *codigo, listtokens *l, pcounter pc) {
+  int i=0;
+  char aux;
+  char temptoken[50];
+  while(!feof(codigo)) {
+    fscanf(codigo,"%c",aux);
+    temptoken[i]=aux; i++;
+    if(aux==' ') {
+      if(l==NULL) {
+	l = malloc(sizeof(listtokens));
+      }
+      else {
+	while (l->prox!=NULL) l=l->prox;
+	l->prox=malloc(sizeof(listtokens));
+	l=l->prox;
+      }
+      strcpy(l->tokenname[y],line[i]); //conferir strcpy
+    }
+  }
+}
+
+  
+void erro(int err) {
+  printf("Erro de sintaxe proximo a linha %d",err);
+  exit(1);
+}
