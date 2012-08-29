@@ -23,11 +23,11 @@ int main(int argc, char *argv[]) {
   l = tokenizer(code,l,pc);
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   while(1) {
-    printf("%s\n",l->tokenname);
+    //printf("%s\n",l->tokenname);
     if(!strcmp(l->tokenname,".align")) {
       if(pc.side==1) {
-	pc.position++;
-	fprintf(hexa,"00000\n");
+				pc.position++;
+				fprintf(hexa,"00000\n");
       }
       pc.side=0;
       l=l->prox;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
     if(!strcmp(l->tokenname,".org")) {
-      printf("mudando origem de %d\n",pc.position);
+      printf("mudando origem de %X\n",pc.position);
       l=l->prox;
       printf("para %s\n",l->tokenname);
       pc.position=strtol(l->tokenname,NULL,16);
@@ -76,26 +76,26 @@ int main(int argc, char *argv[]) {
     if(!strcmp(l->tokenname,"add")) {
       //int count=0;
       if(pc.side==0) {
-	pc.side=1;
-	fprintf(hexa,"\n%03x ",pc.position);
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
       }
       else {
        pc.side=0;
-	pc.position++;
+			 pc.position++;
       }
       l=l->prox;
       fprintf(hexa,"05%s",trataM(l->tokenname)); 
       if(pc.side==0) fprintf(hexa,"\n");
     }
-    if(!strcmp(l->tokenname,"sub")) { //as funções desse tipo vão ser coxas
+    if(!strcmp(l->tokenname,"sub")) { 
       //int count=0;
       if(pc.side==0) {
-	pc.side=1;
-	fprintf(hexa,"\n%03x ",pc.position);
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
       }
       else {
-	pc.side=0;
-	pc.position++;
+				pc.side=0;
+				pc.position++;
       }
       l=l->prox;
       fprintf(hexa,"06%s",trataM(l->tokenname)); 
@@ -204,9 +204,9 @@ char *trata_constante(char *temptoken) {
     if(temptoken[aux+1]!='b' && temptoken[aux+1]!='x' 
        && temptoken[aux+1]!='o') {
       //esse pequeno if acha os decimais
-      printf("entre nesse megaif com temptoken = %s\n",temptoken);
+      //printf("entre nesse megaif com temptoken = %s\n",temptoken);
       sprintf(temptoken,"%010X",atoi(temptoken));
-      printf("Saindo com temptoken = %s\n",temptoken);
+      //printf("Saindo com temptoken = %s\n",temptoken);
     }
   }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='o') { 
@@ -290,6 +290,7 @@ char *trata0o(char *in) {
   octal=strtol(palavra,NULL,8);
   sprintf(palavra,"%010llX",octal);
   strcpy(in,palavra);
+  //printf("Recebi %s, fiz o octal %lld, saiu o hexa %s\n",in,octal,palavra);
   return in;
 }
 char *trata0b(char *in) {
