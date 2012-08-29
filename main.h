@@ -7,15 +7,16 @@ typedef struct pcountera {
 } pcounter;
 typedef struct liste {
   pcounter pos;
-  char *name;
+  char labelname[50];
   struct liste *prox;
-} list;
+} listlabels;
 typedef struct ltokens {
   char tokenname[50];
   char tokentype;
   struct ltokens *prox;
 } listtokens;
 void erro(int err);
+listlabels *addlabel(char *name, listlabels *l, pcounter pc);
 listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
 char *remove_coments(FILE *cod, char *code);
 char *remove_double_spaces(char *code);

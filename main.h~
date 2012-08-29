@@ -1,16 +1,26 @@
-struct pcounter {
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct pcountera {
   int position;
   int side;
-};
+} pcounter;
 typedef struct liste {
-  struct pcounter pos;
-  char *name;
+  pcounter pos;
+  char labelname[50];
   struct liste *prox;
-} list;
+} listlabels;
 typedef struct ltokens {
-  char tokenname[20];
+  char tokenname[50];
+  char tokentype;
   struct ltokens *prox;
 } listtokens;
 void erro(int err);
-void tokenizer(FILE *codigo,listtokens *l);
-void remove_coments(FILE *cod, FILE *temp);
+listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
+char *remove_coments(FILE *cod, char *code);
+char *remove_double_spaces(char *code);
+char *trata_constante(char *temptoken);
+char *trata0x(char *in);
+char *trata0o(char *in); 
+char *trata0b(char *in);
+char *trataM(char *in);
