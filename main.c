@@ -101,6 +101,20 @@ int main(int argc, char *argv[]) {
       fprintf(hexa,"06%s",trataM(l->tokenname)); 
       if(pc.side==0) fprintf(hexa,"\n");
     }
+    if(!strcmp(l->tokenname,"mul")) { 
+      //int count=0;
+      if(pc.side==0) {
+				pc.side=1;
+				fprintf(hexa,"%03x ",pc.position);
+      }
+      else {
+				pc.side=0;
+				pc.position++;
+      }
+      l=l->prox;
+      fprintf(hexa,"0B%s",trataM(l->tokenname)); 
+      if(pc.side==0) fprintf(hexa,"\n");
+    }
     if(l->prox!=NULL)
       l=l->prox;
     else break;
