@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
   char *code = NULL;
   listtokens *l = NULL;
   pcounter pc;
-  int aux;
   pc.position=0;
   pc.side=0;
   codigo=fopen(argv[1],"r+");
@@ -24,194 +23,13 @@ int main(int argc, char *argv[]) {
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   while(1) {
     //printf("%s\n",l->tokenname);
-    if(!strcmp(l->tokenname,".align")) {
-      if(pc.side==1) {
-				pc.position++;
-				fprintf(hexa,"00000\n");
-      }
-      pc.side=0;
-      l=l->prox;
-      aux=pc.position;
-      if(pc.position%atoi(l->tokenname)) 
-	pc.position=pc.position+atoi(l->tokenname)-pc.position%atoi(l->tokenname);
-      printf("aux = %d, pc.position=%d\n",aux,pc.position);
-      if(l->prox!=NULL)
-	l=l->prox;
-      continue;
+    if(l->tokentype=='d') {
+      printf("Tratarei a diretiva %s\n",l->tokenname);
+      trata_diretiva(l,&pc,hexa);
     }
-    if(!strcmp(l->tokenname,".word")) {
-      fprintf(hexa,"%03x ",pc.position);
-      l=l->prox;
-      fprintf(hexa,"%s\n",l->tokenname);
-      pc.position++;
-      pc.side=0;
-      if(l->prox!=NULL)
-	l=l->prox;
-      continue;
-    }
-    if(!strcmp(l->tokenname,".org")) {
-      printf("mudando origem de %X\n",pc.position);
-      l=l->prox;
-      printf("para %s\n",l->tokenname);
-      pc.position=strtol(l->tokenname,NULL,16);
-      if(l->prox!=NULL)
-	l=l->prox;
-      continue;
-    }
-    if(!strcmp(l->tokenname,".wfill")) {
-      l=l->prox;
-      int linhas = strtol(l->tokenname,NULL,16);
-      l=l->prox;
-      int count = 0;
-      for(count=0;count<linhas;count++) {
-	fprintf(hexa,"%03x ",pc.position);
-	fprintf(hexa,"%s\n",l->tokenname);
-	pc.position++;
-	pc.side=0;
-      }
-      if(l->prox!=NULL)
-	l=l->prox;
-      continue;
-    }
-    if(!strcmp(l->tokenname,"add")) {
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-       pc.side=0;
-			 pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"05%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"addmod")) {
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-       pc.side=0;
-			 pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"07%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"sub")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"06%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"submod")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"08%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"mul")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"0B%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"div")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"0C%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"load")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"01%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"loadmq")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"0A%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"loadmqmem")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"09%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
-    }
-    if(!strcmp(l->tokenname,"stor")) { 
-      //int count=0;
-      if(pc.side==0) {
-				pc.side=1;
-				fprintf(hexa,"%03x ",pc.position);
-      }
-      else {
-				pc.side=0;
-				pc.position++;
-      }
-      l=l->prox;
-      fprintf(hexa,"21%s",trataM(l->tokenname)); 
-      if(pc.side==0) fprintf(hexa,"\n");
+    if(l->tokentype=='b') {
+      printf("Tratarei a operação %s\n",l->tokenname);
+      arithmetics(l,&pc,hexa);
     }
     if(l->prox!=NULL)
       l=l->prox;
@@ -219,6 +37,97 @@ int main(int argc, char *argv[]) {
   }
   return 0;
   
+}
+void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
+  long long int aux;
+  if(!strcmp(l->tokenname,".align")) {
+    if(pc->side==1) {
+      pc->position++;
+      fprintf(hexa,"00000\n");
+    }
+    pc->side=0;
+    l=l->prox;
+    aux=pc->position;
+    if(pc->position%atoi(l->tokenname)) 
+      pc->position=pc->position+atoi(l->tokenname)-pc->position%atoi(l->tokenname);
+    printf("aux = %lld, pc->position=%d\n",aux,pc->position);
+    if(l->prox!=NULL)
+      l=l->prox;
+    return;
+  }
+  if(!strcmp(l->tokenname,".word")) {
+    fprintf(hexa,"%03x ",pc->position);
+    l=l->prox;
+    fprintf(hexa,"%s\n",l->tokenname);
+    pc->position++;
+    pc->side=0;
+    if(l->prox!=NULL)
+      l=l->prox;
+    return;
+  }
+  if(!strcmp(l->tokenname,".org")) {
+    printf("mudando origem de %X\n",pc->position);
+    l=l->prox;
+    printf("para %s\n",l->tokenname);
+    pc->position=strtoll(l->tokenname,NULL,16);
+    if(l->prox!=NULL)
+      l=l->prox;
+    return;
+  }
+  if(!strcmp(l->tokenname,".wfill")) {
+    l=l->prox;
+    int linhas = strtoll(l->tokenname,NULL,16);
+    l=l->prox;
+    int count = 0;
+    for(count=0;count<linhas;count++) {
+      fprintf(hexa,"%03x ",pc->position);
+      fprintf(hexa,"%s\n",l->tokenname);
+      pc->position++;
+      pc->side=0;
+    }
+    if(l->prox!=NULL)
+      l=l->prox;
+    return;
+  }
+}
+void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
+  char *next;
+  char token[50];
+  strcpy(token,l->tokenname);
+  next = malloc(sizeof(char)*4);
+  if(pc->side==0) {
+    pc->side=1;
+    fprintf(hexa,"%03x ",pc->position);
+  }
+  else {
+    pc->side=0;
+    pc->position++;
+  }
+  l=l->prox;
+  if(l->tokentype == 'm')
+    next = trataM(l->tokenname);
+  if(l->tokentype == 'l') 
+    next = trataL(l->tokenname);
+  next[3] = '\0';
+  printf("O next vale %s\n",next);
+  if(!strcmp(token,"add")) 
+    fprintf(hexa,"05%s",next); 
+  if(!strcmp(token,"addmod")) 
+    fprintf(hexa,"07%s",next); 
+  if(!strcmp(token,"sub")) 
+    fprintf(hexa,"08%s",next); 
+  if(!strcmp(token,"mul")) 
+    fprintf(hexa,"0B%s",next); 
+  if(!strcmp(token,"div")) 
+    fprintf(hexa,"0C%s",next); 
+  if(!strcmp(token,"load"))
+    fprintf(hexa,"0A%s",next); 
+  if(!strcmp(token,"loadmqmem")) 
+    fprintf(hexa,"09%s",next); 
+  if(!strcmp(token,"stor")) 
+    fprintf(hexa,"21%s",next); 
+  if(pc->side==0) fprintf(hexa,"\n");
+  return;
 }
 char *remove_coments(FILE *cod, char *code) { //OK
   int k=100;
@@ -249,6 +158,7 @@ char *remove_double_spaces(char *code) {
   int i=0,k=100,y=0;
   char *code2;
   code2 = malloc(sizeof(char)*k);
+  memset(code2,'0',k);
   while(code[i]==' ') i++;
   while(code[i+1]!='\0') {
     if(code[i]==' ' && code[i+1]==' ') {
@@ -261,6 +171,7 @@ char *remove_double_spaces(char *code) {
     if(y>=k) {
       k=2*k;
       code2 = realloc(code2,k);
+      //for(z=y;z<k;z++) code2[z]='0';
     }
   }
   code2[y] = '\0';
@@ -273,7 +184,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   l->prox=NULL;
   auxlist = l;
   int i=0,y=0;
-  char *temptoken,*auxtoken;
+  char *temptoken,*auxtoken,type;
   temptoken = malloc(sizeof(char)*50);
   auxtoken = malloc(sizeof(char)*50);
   memset(temptoken,'0',50);
@@ -285,11 +196,15 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       temptoken[y] = '\0';
       strcpy(auxtoken,temptoken);
       temptoken = trata_constante(temptoken); //constantes em hexa
-      if(!strcmp(temptoken,auxtoken))
-	l->tokentype='d';
-      else
-	l->tokentype = 'c';
-	 
+      type = 'b'; //tipo aleatorio
+      if(strcmp(temptoken,auxtoken))
+	type='c'; //constante
+      if(temptoken[y-1]==':')
+	type = 'l'; //label
+      if(temptoken[0]=='m' && temptoken[1]=='(')
+	type = 'm';
+      if(temptoken[0]=='.')
+	type = 'd'; //diretiva
       y=0; i++;
       //printf("Adicionando token --%s-- a lista\n",temptoken);
       //adiciona o token a lista
@@ -297,8 +212,9 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       l->prox=malloc(sizeof(listtokens));
       l=l->prox;
       l->prox=NULL;
+      l->tokentype = type;
       memset(l->tokenname,'0',50);
-      strcpy(l->tokenname,temptoken); 
+      strcpy(l->tokenname,temptoken);
       memset(temptoken,'0',50);
     }
   }
@@ -322,18 +238,16 @@ char *trata_constante(char *temptoken) {
     }
   }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='o') { 
-    //trata entradas octal, hexa
-    //printf("Vou tratar octal, in %s\n",temptoken);//binary e dec pra string
+    //trata octal pra hexa
+    //binary e dec pra string
     temptoken=trata0o(temptoken); //hexa sem 0x
     //printf("out %s\n",temptoken);
   }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='x') {
-    //printf("Vou tratar hexa, in %s\n",temptoken);
     temptoken=trata0x(temptoken);
     //printf("out %s\n",temptoken);
   }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='b') {
-    //printf("Vou tratar binary, in %s\n",temptoken);
     temptoken=trata0b(temptoken);
     //printf("out %s\n",temptoken);
   }
@@ -399,7 +313,7 @@ char *trata0o(char *in) {
   for(count2=0;count2<count-1;count2++) //o -1 mata o 'o'
     palavra[13-count2]=in[count-count2];
   palavra[14]='\0';
-  octal=strtol(palavra,NULL,8);
+  octal=strtoll(palavra,NULL,8);
   sprintf(palavra,"%010llX",octal);
   strcpy(in,palavra);
   //printf("Recebi %s, fiz o octal %lld, saiu o hexa %s\n",in,octal,palavra);
@@ -417,9 +331,12 @@ char *trata0b(char *in) {
   for(count2=0;count2<count-1;count2++) //o -1 mata o 'o'
     palavra[48-count2]=in[count-count2];
   palavra[49]='\0';
-  binary=strtol(palavra,NULL,2);
+  binary=strtoll(palavra,NULL,2);
   sprintf(palavra,"%010llX",binary);
   //printf("%s palavra, %lld binary\n",palavra,binary);
   strcpy(in,palavra);
   return in;
+}
+char *trataL(char *in) {
+  return "000";
 }

@@ -20,5 +20,7 @@ ADD M(10)
 .wfill 10,100
 add M(4)
 add M(5)
-add M(96)
+sub M(96)
 sub M(54)
+.org 0x149
+.wfill 5,50
