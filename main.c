@@ -1,5 +1,4 @@
 #include "main.h"
-#include <ctype.h>
 int main(int argc, char *argv[]) {
   if(argc!=3) {
     printf("Entrada Invalida\n");
@@ -10,6 +9,7 @@ int main(int argc, char *argv[]) {
   hexa=fopen(argv[2],"w+");
   char *code = NULL;
   listtokens *l = NULL,*lb = NULL;
+  listlabels *ll = NULL;
   pcounter pc;
   pc.position=0;
   pc.side=0;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     }
     if(l->tokentype=='b') {
       printf("Tratarei a operação %s\n",l->tokenname);
-      arithmetics(l,&pc,hexa);
+      arithmetics(l,&pc,hexa,ll);
     }
     if(l->prox!=NULL)
       l=l->prox;
@@ -55,9 +55,6 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     if(pc->position%atoi(l->tokenname)) 
       pc->position=pc->position+atoi(l->tokenname)-pc->position%atoi(l->tokenname);
     printf("aux = %lld, pc->position=%d\n",aux,pc->position);
-    if(l->prox!=NULL)
-      l=l->prox;
-    return;
   }
   if(!strcmp(l->tokenname,".word")) {
     fprintf(hexa,"%03x ",pc->position);
@@ -65,18 +62,12 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     fprintf(hexa,"%s\n",l->tokenname);
     pc->position++;
     pc->side=0;
-    if(l->prox!=NULL)
-      l=l->prox;
-    return;
   }
   if(!strcmp(l->tokenname,".org")) {
     printf("mudando origem de %X\n",pc->position);
     l=l->prox;
     printf("para %s\n",l->tokenname);
     pc->position=strtoll(l->tokenname,NULL,16);
-    if(l->prox!=NULL)
-      l=l->prox;
-    return;
   }
   if(!strcmp(l->tokenname,".wfill")) {
     l=l->prox;
@@ -89,12 +80,15 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
       pc->position++;
       pc->side=0;
     }
-    if(l->prox!=NULL)
+  }
+  if(!strcmp(l->tokenname,".set")) {
+    //preciso estudar melhor a .set
+  }
+   if(l->prox!=NULL)
       l=l->prox;
     return;
-  }
 }
-void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
+void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
   label *nextl;
   nextl = malloc(sizeof(label));
   nextl->side=0;
@@ -116,7 +110,7 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
     nextl->position = trataM(auxtoken);
   }
   if(l->tokentype == 'l') 
-    nextl = trataL(auxtoken);
+    nextl = trataL(auxtoken,pc,ll);
   nextl->position[3] = '\0';
   printf("O next vale %s\n",nextl->position);
   if(!strcmp(token,"add")) 
@@ -379,7 +373,7 @@ char *trata0b(char *in) {
   strcpy(in,palavra);
   return in;
 }
-label *trataL(char *in) {
+label *trataL(char *in,pcounter *pc,listlabels *l) {
   label *intern;
   intern = malloc(sizeof(label));
   intern->position="010";
