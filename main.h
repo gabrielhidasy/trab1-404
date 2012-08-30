@@ -15,6 +15,10 @@ typedef struct ltokens {
   char tokentype;
   struct ltokens *prox;
 } listtokens;
+typedef struct labell {
+  char *position;
+  int side;
+} label;
 void erro(int err);
 listlabels *addlabel(char *name, listlabels *l, pcounter pc);
 listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
@@ -27,4 +31,4 @@ char *trata0x(char *in);
 char *trata0o(char *in); 
 char *trata0b(char *in);
 char *trataM(char *in);
-char *trataL(char *in);
+label *trataL(char *in);

@@ -95,7 +95,9 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
   }
 }
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
-  char *next;
+  label *nextl;
+  nextl = malloc(sizeof(label));
+  nextl->side=0;
   char token[50],auxtoken[50];
   strcpy(token,l->tokenname);
   if(pc->side==0) {
@@ -108,28 +110,60 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
   }
   l=l->prox;
   strcpy(auxtoken,l->tokenname);
-  if(l->tokentype == 'm')
-    next = trataM(auxtoken);
+  if(l->tokentype == 'm') {
+    nextl = malloc(sizeof(label));
+    nextl->side=0;
+    nextl->position = trataM(auxtoken);
+  }
   if(l->tokentype == 'l') 
-    next = trataL(auxtoken);
-  next[3] = '\0';
-  printf("O next vale %s\n",next);
+    nextl = trataL(auxtoken);
+  nextl->position[3] = '\0';
+  printf("O next vale %s\n",nextl->position);
   if(!strcmp(token,"add")) 
-    fprintf(hexa,"05%s",next); 
+    fprintf(hexa,"05%s",nextl->position); 
   if(!strcmp(token,"addmod")) 
-    fprintf(hexa,"07%s",next); 
+    fprintf(hexa,"07%s",nextl->position); 
   if(!strcmp(token,"sub")) 
-    fprintf(hexa,"08%s",next); 
+    fprintf(hexa,"08%s",nextl->position); 
   if(!strcmp(token,"mul")) 
-    fprintf(hexa,"0B%s",next); 
+    fprintf(hexa,"0B%s",nextl->position); 
   if(!strcmp(token,"div")) 
-    fprintf(hexa,"0C%s",next); 
+    fprintf(hexa,"0C%s",nextl->position); 
   if(!strcmp(token,"load"))
-    fprintf(hexa,"0A%s",next); 
+    fprintf(hexa,"01%s",nextl->position); 
   if(!strcmp(token,"loadmqmem")) 
-    fprintf(hexa,"09%s",next); 
+    fprintf(hexa,"09%s",nextl->position); 
   if(!strcmp(token,"stor")) 
-    fprintf(hexa,"21%s",next); 
+    fprintf(hexa,"21%s",nextl->position); 
+  if(!strcmp(token,"loadneg")) 
+    fprintf(hexa,"02%s",nextl->position);
+  if(!strcmp(token,"loadmod")) 
+    fprintf(hexa,"03%s",nextl->position);
+  if(!strcmp(token,"loadmq")) 
+    fprintf(hexa,"0A%s",nextl->position);
+  if(!strcmp(token,"lsh")) 
+    fprintf(hexa,"14%s",nextl->position);
+  if(!strcmp(token,"rsh")) 
+    fprintf(hexa,"15%s",nextl->position);
+  //se não for nenhuma dessas, então é das chatas
+  if(!strcmp(token,"jump")) {
+    if(nextl->side==0)
+      fprintf(hexa,"0D%s",nextl->position);
+    else
+      fprintf(hexa,"0E%s",nextl->position);
+  }
+   if(!strcmp(token,"jumppos")) {
+     if(nextl->side==0)
+      fprintf(hexa,"0F%s",nextl->position);
+    else
+      fprintf(hexa,"10%s",nextl->position);
+  }
+    if(!strcmp(token,"storaddr")) {
+      if(nextl->side==0)
+      fprintf(hexa,"12%s",nextl->position);
+    else
+      fprintf(hexa,"13%s",nextl->position);
+  }
   if(pc->side==0) fprintf(hexa,"\n");
   return;
 }
@@ -345,6 +379,10 @@ char *trata0b(char *in) {
   strcpy(in,palavra);
   return in;
 }
-char *trataL(char *in) {
-  return "000";
+label *trataL(char *in) {
+  label *intern;
+  intern = malloc(sizeof(label));
+  intern->position="010";
+  intern->side=1;
+  return intern;
 }
