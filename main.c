@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   FILE *hexa;
   hexa=fopen(argv[2],"w+");
   char *code = NULL;
-  listtokens *l = NULL;
+  listtokens *l = NULL,*lb = NULL;
   pcounter pc;
   pc.position=0;
   pc.side=0;
@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
   }
   code = remove_coments(codigo,code);
   l = tokenizer(code,l,pc);
+  lb = l;
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   while(1) {
     //printf("%s\n",l->tokenname);
@@ -35,6 +36,9 @@ int main(int argc, char *argv[]) {
       l=l->prox;
     else break;
   }
+  l = lb; //daqui que voltamos a lista original
+  fclose(codigo);
+  fclose(hexa);
   return 0;
   
 }
@@ -92,9 +96,8 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
 }
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
   char *next;
-  char token[50];
+  char token[50],auxtoken[50];
   strcpy(token,l->tokenname);
-  next = malloc(sizeof(char)*4);
   if(pc->side==0) {
     pc->side=1;
     fprintf(hexa,"%03x ",pc->position);
@@ -104,10 +107,11 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa) {
     pc->position++;
   }
   l=l->prox;
+  strcpy(auxtoken,l->tokenname);
   if(l->tokentype == 'm')
-    next = trataM(l->tokenname);
+    next = trataM(auxtoken);
   if(l->tokentype == 'l') 
-    next = trataL(l->tokenname);
+    next = trataL(auxtoken);
   next[3] = '\0';
   printf("O next vale %s\n",next);
   if(!strcmp(token,"add")) 
@@ -134,7 +138,7 @@ char *remove_coments(FILE *cod, char *code) { //OK
   char aux = 0;
   int i=0;
   code = malloc(sizeof(char)*k);
-  memset(code,0,k);
+  memset(code,'0',k);
   while(!feof(cod)) {
     fscanf(cod,"%c",&aux);
     if(aux=='@') {
@@ -146,7 +150,7 @@ char *remove_coments(FILE *cod, char *code) { //OK
     code[i]=aux; i++;
     if(i>=k) {
       k = k*2;
-      code = realloc(code,k);
+      code = realloc(code,sizeof(char)*k);
     }
   }
   code[i]='\0';
@@ -170,12 +174,14 @@ char *remove_double_spaces(char *code) {
     y++;
     if(y>=k) {
       k=2*k;
-      code2 = realloc(code2,k);
-      //for(z=y;z<k;z++) code2[z]='0';
+      code2 = realloc(code2,sizeof(char)*k);
     }
   }
   code2[y] = '\0';
-  return code2;
+  memset(code,'0',i);
+  strcpy(code,code2);
+  free(code2);
+  return code;
 }
 listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   listtokens *auxlist;
@@ -218,6 +224,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       memset(temptoken,'0',50);
     }
   }
+  free(auxtoken);
   return auxlist;
 }
 
@@ -276,6 +283,7 @@ char *trataM(char *in) {
     sprintf(saida,"%c%c%c",tmptoken[count-2],tmptoken[count-1],tmptoken[count]);
     memset(in,'0',50);
     strcpy(in,saida);
+    free(tmptoken);
     return in;
   } 
   //else erro no codigo
