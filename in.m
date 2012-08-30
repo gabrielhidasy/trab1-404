@@ -7,7 +7,7 @@ ADD M(10)
 .word -10
 .word 0x9
 .word 0x10000
-.org 0o200
+.orrg 0o200
 .word 0x100000
 .word 0x99090
 .word 0o377777
@@ -19,6 +19,7 @@ ADD M(10)
 .org 0x150
 .wfill 10,100
 add M(4)
+cis M(93)
 add M(5)
 sub M(96)
 sub M(54)

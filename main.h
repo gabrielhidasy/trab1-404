@@ -9,6 +9,7 @@ typedef struct pcountera {
 typedef struct ltokens {
   char tokenname[50];
   char tokentype;
+  int tokenline;
   struct ltokens *prox;
 } listtokens;
 typedef struct labell {
@@ -20,7 +21,7 @@ typedef struct liste {
   char labelname[50];
   struct liste *prox;
 } listlabels;
-void erro(int err);
+void erro(int err,char *desc);
 listlabels *addlabel(char *name, listlabels *l, pcounter pc);
 listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll);

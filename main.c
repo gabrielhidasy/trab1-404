@@ -44,7 +44,10 @@ int main(int argc, char *argv[]) {
 }
 void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
   long long int aux;
+  int err,flag = 0;
+  err=l->tokenline;
   if(!strcmp(l->tokenname,".align")) {
+    flag = 1;
     if(pc->side==1) {
       pc->position++;
       fprintf(hexa,"00000\n");
@@ -57,6 +60,7 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     printf("aux = %lld, pc->position=%d\n",aux,pc->position);
   }
   if(!strcmp(l->tokenname,".word")) {
+flag = 1;
     fprintf(hexa,"%03x ",pc->position);
     l=l->prox;
     fprintf(hexa,"%s\n",l->tokenname);
@@ -64,12 +68,14 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     pc->side=0;
   }
   if(!strcmp(l->tokenname,".org")) {
+    flag = 1;
     printf("mudando origem de %X\n",pc->position);
     l=l->prox;
     printf("para %s\n",l->tokenname);
     pc->position=strtoll(l->tokenname,NULL,16);
   }
   if(!strcmp(l->tokenname,".wfill")) {
+    flag = 1;
     l=l->prox;
     int linhas = strtoll(l->tokenname,NULL,16);
     l=l->prox;
@@ -82,14 +88,18 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     }
   }
   if(!strcmp(l->tokenname,".set")) {
+    flag = 1;
     //preciso estudar melhor a .set
   }
+   if(!flag) erro(err,"Diretiva desconhecida"); 
    if(l->prox!=NULL)
       l=l->prox;
     return;
 }
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
   label *nextl;
+  int line = l->tokenline;
+  int aux=0;
   nextl = malloc(sizeof(label));
   nextl->side=0;
   char token[50],auxtoken[50];
@@ -113,52 +123,56 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
     nextl = trataL(auxtoken,pc,ll);
   nextl->position[3] = '\0';
   printf("O next vale %s\n",nextl->position);
-  if(!strcmp(token,"add")) 
-    fprintf(hexa,"05%s",nextl->position); 
-  if(!strcmp(token,"addmod")) 
-    fprintf(hexa,"07%s",nextl->position); 
-  if(!strcmp(token,"sub")) 
-    fprintf(hexa,"08%s",nextl->position); 
-  if(!strcmp(token,"mul")) 
-    fprintf(hexa,"0B%s",nextl->position); 
-  if(!strcmp(token,"div")) 
-    fprintf(hexa,"0C%s",nextl->position); 
-  if(!strcmp(token,"load"))
-    fprintf(hexa,"01%s",nextl->position); 
-  if(!strcmp(token,"loadmqmem")) 
-    fprintf(hexa,"09%s",nextl->position); 
-  if(!strcmp(token,"stor")) 
-    fprintf(hexa,"21%s",nextl->position); 
-  if(!strcmp(token,"loadneg")) 
-    fprintf(hexa,"02%s",nextl->position);
-  if(!strcmp(token,"loadmod")) 
-    fprintf(hexa,"03%s",nextl->position);
-  if(!strcmp(token,"loadmq")) 
-    fprintf(hexa,"0A%s",nextl->position);
-  if(!strcmp(token,"lsh")) 
-    fprintf(hexa,"14%s",nextl->position);
-  if(!strcmp(token,"rsh")) 
-    fprintf(hexa,"15%s",nextl->position);
+  if(!strcmp(token,"add")) { 
+    fprintf(hexa,"05%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"addmod")) { 
+    fprintf(hexa,"07%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"sub")) { 
+    fprintf(hexa,"08%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"mul")) { 
+    fprintf(hexa,"0B%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"div")) { 
+    fprintf(hexa,"0C%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"load")) {
+    fprintf(hexa,"01%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"loadmqmem")) { 
+    fprintf(hexa,"09%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"stor")) { 
+    fprintf(hexa,"21%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"loadneg")) { 
+    fprintf(hexa,"02%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"loadmod")) { 
+    fprintf(hexa,"03%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"loadmq")) { 
+    fprintf(hexa,"0A%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"lsh")) { 
+    fprintf(hexa,"14%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"rsh")) { 
+    fprintf(hexa,"15%s",nextl->position); aux=1;  }
   //se não for nenhuma dessas, então é das chatas
   if(!strcmp(token,"jump")) {
+    aux=1;
     if(nextl->side==0)
       fprintf(hexa,"0D%s",nextl->position);
     else
       fprintf(hexa,"0E%s",nextl->position);
   }
    if(!strcmp(token,"jumppos")) {
+     aux=1;
      if(nextl->side==0)
       fprintf(hexa,"0F%s",nextl->position);
     else
       fprintf(hexa,"10%s",nextl->position);
   }
     if(!strcmp(token,"storaddr")) {
+      aux=1;
       if(nextl->side==0)
       fprintf(hexa,"12%s",nextl->position);
     else
       fprintf(hexa,"13%s",nextl->position);
   }
   if(pc->side==0) fprintf(hexa,"\n");
+  if(!aux) erro(line,"Operação desconhecida"); 
   return;
 }
 char *remove_coments(FILE *cod, char *code) { //OK
@@ -174,7 +188,7 @@ char *remove_coments(FILE *cod, char *code) { //OK
 	fscanf(cod,"%c",&aux);
       } 
     }
-    if(aux=='\n') aux = ' ';
+    if(aux=='\n') aux = '#';
     code[i]=aux; i++;
     if(i>=k) {
       k = k*2;
@@ -191,9 +205,10 @@ char *remove_double_spaces(char *code) {
   char *code2;
   code2 = malloc(sizeof(char)*k);
   memset(code2,'0',k);
-  while(code[i]==' ') i++;
+  while(code[i]==' ' || code[i]=='#') i++;
   while(code[i+1]!='\0') {
-    if(code[i]==' ' && code[i+1]==' ') {
+    if((code[i]==' ' && code[i+1]==' ') ||
+    	 (code[i]=='#' && code[i+1]=='#')) {
       i++;
       continue;
     }
@@ -217,7 +232,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   strcpy(l->tokenname,"head");
   l->prox=NULL;
   auxlist = l;
-  int i=0,y=0;
+  int i=0,y=0,line=-1;
   char *temptoken,*auxtoken,type;
   temptoken = malloc(sizeof(char)*50);
   auxtoken = malloc(sizeof(char)*50);
@@ -226,7 +241,11 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   //printf("%s",code);
   while(code[i]!='\0') {
     temptoken[y]=tolower(code[i]); i++; y++;
-    if(code[i]==' ' || code[i]==',' || code[i]=='\0') {
+    if(code[i]==' ' || code[i]==',' || code[i]=='\0' || code[i]=='#') {
+    	if(code[i]=='#') {
+    		line++;
+    		code[i]=0;
+    		}
       temptoken[y] = '\0';
       strcpy(auxtoken,temptoken);
       temptoken = trata_constante(temptoken); //constantes em hexa
@@ -247,6 +266,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       l=l->prox;
       l->prox=NULL;
       l->tokentype = type;
+      l->tokenline = line;
       memset(l->tokenname,'0',50);
       strcpy(l->tokenname,temptoken);
       memset(temptoken,'0',50);
@@ -317,8 +337,8 @@ char *trataM(char *in) {
   //else erro no codigo
   return NULL;
 }
-void erro(int err) {
-  printf("Erro de sintaxe proximo a linha %d",err);
+void erro(int err, char *desc) {
+  printf("Erro de sintaxe\n%s\n",desc);
   exit(1);
 }
 

@@ -19,8 +19,9 @@ ADD M(10)
 .org 0x150
 .wfill 10,100
 add M(4)
+cis M(93)
 add M(5)
 sub M(96)
 sub M(54)
-.org 0x149
+.org 0x14E
 .wfill 5,50
