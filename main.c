@@ -187,7 +187,14 @@ char *remove_coments(FILE *cod, char *code) { //OK
       while(aux!='\n') {
 	fscanf(cod,"%c",&aux);
       } 
-    }
+      code[i]='c'; i++;
+      code[i]='o'; i++;
+      code[i]='m'; i++;
+      code[i]='m'; i++;
+      code[i]='e'; i++;
+      code[i]='n'; i++;
+      code[i]='t'; i++;
+    } 
     if(aux=='\n') aux = '#';
     code[i]=aux; i++;
     if(i>=k) {
@@ -205,10 +212,10 @@ char *remove_double_spaces(char *code) {
   char *code2;
   code2 = malloc(sizeof(char)*k);
   memset(code2,'0',k);
-  while(code[i]==' ' || code[i]=='#') i++;
+  while(code[i]==' ' || code[i]=='#') i++; 
   while(code[i+1]!='\0') {
-    if((code[i]==' ' && code[i+1]==' ') ||
-    	 (code[i]=='#' && code[i+1]=='#')) {
+    if((code[i]==' ' && code[i+1]==' ') || (code[i]=='#' && code[i+1]=='#') ||
+       (code[i]==' ' && code[i+1]=='#') || (code[i]=='#' && code[i+1]=='0')){
       i++;
       continue;
     }
@@ -232,20 +239,19 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   strcpy(l->tokenname,"head");
   l->prox=NULL;
   auxlist = l;
-  int i=0,y=0,line=-1;
+  int i=0,y=0,line=1;
   char *temptoken,*auxtoken,type;
   temptoken = malloc(sizeof(char)*50);
   auxtoken = malloc(sizeof(char)*50);
   memset(temptoken,'0',50);
   memset(auxtoken,'0',50);
-  //printf("%s",code);
+  printf("\n%s\n",code);
   while(code[i]!='\0') {
     temptoken[y]=tolower(code[i]); i++; y++;
     if(code[i]==' ' || code[i]==',' || code[i]=='\0' || code[i]=='#') {
     	if(code[i]=='#') {
-    		line++;
-    		code[i]=0;
-    		}
+	  line++;
+	}
       temptoken[y] = '\0';
       strcpy(auxtoken,temptoken);
       temptoken = trata_constante(temptoken); //constantes em hexa
@@ -261,6 +267,9 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       y=0; i++;
       //printf("Adicionando token --%s-- a lista\n",temptoken);
       //adiciona o token a lista
+      if(!strcmp("comment",temptoken)) {
+	type = 'z';
+      }
       while (l->prox!=NULL) l=l->prox;
       l->prox=malloc(sizeof(listtokens));
       l=l->prox;
@@ -338,7 +347,7 @@ char *trataM(char *in) {
   return NULL;
 }
 void erro(int err, char *desc) {
-  printf("Erro de sintaxe\n%s\n",desc);
+  printf("Erro de sintaxe proximo a linha %d\n%s\n",err,desc);
   exit(1);
 }
 
