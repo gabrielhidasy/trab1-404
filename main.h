@@ -17,12 +17,12 @@ typedef struct labell {
   int side;
 } label;
 typedef struct liste {
-  label pos;
-  char labelname[50];
+  pcounter label;
+  char *labelname;
   struct liste *prox;
 } listlabels;
 void erro(int err,char *desc);
-listlabels *addlabel(char *name, listlabels *l, pcounter pc);
+listlabels *addlabel(char *name, listlabels *l, pcounter *pc);
 listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll);
 void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa);
@@ -33,4 +33,4 @@ char *trata0x(char *in);
 char *trata0o(char *in); 
 char *trata0b(char *in);
 char *trataM(char *in);
-label *trataL(char *in,pcounter *pc,listlabels *ll);
+label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl);

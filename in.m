@@ -32,3 +32,4 @@ sub M(96)
 sub M(54)
 .org 0x14E
 .wfill 5,50
+jump M(labelx):
