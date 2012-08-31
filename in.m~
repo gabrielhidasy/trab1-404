@@ -6,10 +6,12 @@ labelx:
 ADD M(10)
 .align 1
 .word 64202
-.word -1
+jump m(labelc)
+.align 1
 .word -10
-DIV M(004)
+DIV M(4)
 .align 11
+labeljucara: 
 .word 0x9
 .word 0x9
 .word 0x10000
@@ -24,12 +26,14 @@ DIV M(004)
 .word 0b1010
 .word 0xFFFFFFFFFF
 .org 0x150
+labelc:
 .wfill 10,100
 add M(4)
 addmod M(93)
-add M(5)
+add M(labelc)
 sub M(96)
 sub M(54)
 .org 0x14E
 .wfill 5,50
-jump labelx:
+jump M(labelx)
+labelcaca:
