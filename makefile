@@ -3,7 +3,7 @@ CFLAGS = -Wall -ansi -g -std=c99 -lm
 OUTPUT = binary
 CC = gcc
 all:
-	@$(CC) $(CFLAGS) $(SRC) -o binary
+	@$(CC) $(CFLAGS) $(SRC) -o montador-ias
 clean:
 	@rm -rf *.o *.s *.zip
 zip: 

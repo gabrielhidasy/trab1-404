@@ -13,10 +13,11 @@ DIV M(4)
 .align 11
 labeljucara: 
 .word 0x9
+.set CAO 1010
 .word 0x9
 .word 0x10000
 .org 0o200
-.word 0x100000
+@.word 0x100000
 .word 0x99090
 .word 0o377777
 @Comment inutil
@@ -24,7 +25,7 @@ labeljucara:
 .align 20
 .word 0b1101110110101011101010101101001011101011
 .word 0b1010
-.word 0xFFFFFFFFFF
+.word CAO
 .org 0x150
 labelc:
 .wfill 10,100
@@ -36,4 +37,4 @@ sub M(54)
 .org 0x14E
 .wfill 5,50
 jump M(labelx)
-label caca:
+caca:

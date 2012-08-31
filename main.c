@@ -1,20 +1,4 @@
 #include "main.h"
-void printlist (listtokens *l) {
-  listtokens *aux;
-  aux = l;
-  while(aux->prox!=NULL) {
-    printf("Conteudo da lista ->\n    List->tokenname=%s\n    List->tokentype=%c\n    List->tokenline=%d\n",aux->tokenname,aux->tokentype,aux->tokenline);
-    aux=aux->prox;
-  }
-}
-void printlables (listlabels *l) {
-  listlabels *aux;
-  aux = l;
-  while(aux->prox!=NULL) {
-    printf("List->labelname=%s\n",aux->labelname);
-    aux=aux->prox;
-  }
-}
 int main(int argc, char *argv[]) {
   if(argc!=3) {
     printf("Entrada Invalida\n");
@@ -40,6 +24,7 @@ int main(int argc, char *argv[]) {
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   lb = l;
   while(1) {
+    printlist(l);
     //printf("%s\n",l->tokenname);
     if(l->tokentype=='f') {
       if(pc.side==1) fprintf(hexa,"00000");
@@ -48,10 +33,10 @@ int main(int argc, char *argv[]) {
     }
     if(l->tokentype=='d') {
       //printf("Tratarei a diretiva %s\n",l->tokenname);
-      trata_diretiva(l,&pc,hexa);
-    }
+      l=trata_diretiva(l,&pc,hexa);
+    } 
     if(l->tokentype=='b') {
-      //printf("Tratarei a operação %s\n",l->tokenname);
+      printf("Tratarei a operação %s\n",l->tokenname);
       arithmetics(l,&pc,hexa,ll);
     }
     if(l->tokentype=='l') {
@@ -62,6 +47,9 @@ int main(int argc, char *argv[]) {
       l=l->prox;
     else break;
   }
+  printf("--------------------------------------\n");
+  printlables(ll);
+  printf("--------------------------------------\n");
   l = lb; //daqui que voltamos a lista original
   rewind(hexa); //vamos re-escrever
   pc.side=0;
@@ -72,31 +60,32 @@ int main(int argc, char *argv[]) {
       if(pc.side==1) fprintf(hexa,"00000");
       //printf("Atingido final do codigo\n");
       break;
-    }
+    } 
     if(l->tokentype=='d') {
       //printf("Tratarei a diretiva %s\n",l->tokenname);
-      trata_diretiva(l,&pc,hexa);
+      l=trata_diretiva(l,&pc,hexa);
     }
+      
     if(l->tokentype=='b') {
-      //printf("Tratarei a operação %s\n",l->tokenname);
+      printf("Tratarei a operação1 %s\n",l->tokenname);
       arithmetics(l,&pc,hexa,ll);
-    }
+    } 
     if(l->tokentype=='l') {
       //printf("Adicionando label\n");
       ll = addlabel(l->tokenname,ll,&pc);
-    }
+    } 
     if(l->prox!=NULL)
       l=l->prox;
     else break;
   }
-  printlables(ll);
   fclose(codigo);
   fclose(hexa);
   return 0;
   
 }
-void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
+listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
   long long int tkname;
+  listtokens *ret = l;
   //int aux;
   int err,flag = 0;
   err=l->tokenline;
@@ -142,6 +131,8 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     l=l->prox;
     int linhas = strtoll(l->tokenname,NULL,16);
     l=l->prox;
+    //como funciona isso com label? ele pega o label e poe como palavra ou
+    //printa a palavra referenciada pelo label?
     int count = 0;
     for(count=0;count<linhas;count++) {
       fprintf(hexa,"%03x ",pc->position);
@@ -152,12 +143,32 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
   }
   if(!strcmp(l->tokenname,".set")) {
     flag = 1;
-    //preciso estudar melhor a .set
+    l=l->prox; 
+    char setin[50];
+    char setout[50];
+    int i=0;
+    strcpy(setin,l->tokenname); //um nome
+    l=l->prox;
+    strcpy(setout,l->tokenname); //é uma constante
+    listtokens *aux;
+    printf("aqui na .set vamos trocar todas as %s por %s\n",setin,setout);
+    aux = l;
+    while(1) {
+      if(!strcmp(aux->tokenname,setin)) {
+	strcpy(aux->tokenname,setout);
+	aux->tokentype='c';
+	i++;
+      }
+      if(aux->prox!=NULL) aux=aux->prox;
+      else break;
+    }
+    printf("Troquei %d coisas\n",i);
+    return l;
   }
-   if(!flag) erro(err,"Diretiva desconhecida"); 
-   if(l->prox!=NULL)
-      l=l->prox;
-    return;
+  if(!flag) erro(err,"Diretiva desconhecida"); 
+  if(l->prox!=NULL)
+    l=l->prox;
+  return ret;
 }
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
   label *nextl;
@@ -186,8 +197,8 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
     nextl->position[3] = '\0';
   }
   if(!strcmp(nextl->position,"666")) {
-      nextl=trataL(l->tokenname,pc,ll,nextl);
-    }
+    nextl=trataL(l->tokenname,pc,ll,nextl);
+  }
   if(nextl->side==3) {
     char *invalidop = malloc(sizeof(char)*100);
     sprintf(invalidop,"Operação Invalida %s\n",token);
@@ -228,16 +239,16 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
     else
       fprintf(hexa,"0E%s",nextl->position);
   }
-   if(!strcmp(token,"jumppos")) {
-     aux=1;
-     if(nextl->side==0)
+  if(!strcmp(token,"jumppos")) {
+    aux=1;
+    if(nextl->side==0)
       fprintf(hexa,"0F%s",nextl->position);
     else
       fprintf(hexa,"10%s",nextl->position);
   }
-    if(!strcmp(token,"storaddr")) {
-      aux=1;
-      if(nextl->side==0)
+  if(!strcmp(token,"storaddr")) {
+    aux=1;
+    if(nextl->side==0)
       fprintf(hexa,"12%s",nextl->position);
     else
       fprintf(hexa,"13%s",nextl->position);
@@ -253,38 +264,12 @@ listlabels *addlabel(char *name, listlabels *l, pcounter *pc) {
   char *auxname = malloc(sizeof(char)*50);
   int i=0;
   aux = l;
-  printf("Recebi o token %s pra inserir com pc %d (%X)\n",
-	name,pc->position,pc->position); 
-  if(l==NULL) { //não precisa checar repetição, era null
-    l = malloc(sizeof(listlabels));
-    aux = l;
-    l->prox = NULL;
-    l->label.position=pc->position;
-    l->label.side=pc->side;
-    l->labelname=malloc(sizeof(char)*50);
-    strcpy(l->labelname,name);
-    i=0;
-    while(l->labelname[i]!=':') i++;
-    l->labelname[i]='\0';
-    printf("l->labelname foi inserido como %s\n",l->labelname);
-    return aux;
-  }
-  sprintf(auxname,"%s",name);
-    i=0;
-    while(auxname[i]!=':') i++;
-    auxname[i]='\0';
-  while(l->prox!=NULL) {
-    printf("l->labelname=%s,name=%s\n",l->labelname,auxname);
-    if(!strcmp(l->labelname,auxname)) { //checa repetição
-      printf("Oia nego tentando inserir repetido soo\n\n");
-      return aux;
-    }
-    l=l->prox;
-  }
-  printf("Vou ter que inserir um label novo mesmo\n");
-  l->prox = malloc(sizeof(listlabels));
-  l=l->prox;
-  l->prox=NULL;
+  //printf("Recebi o token %s pra inserir com pc %d (%X)\n",
+  //name,pc->position,pc->position); 
+if(l==NULL) { //não precisa checar repetição, era null
+  l = malloc(sizeof(listlabels));
+  aux = l;
+  l->prox = NULL;
   l->label.position=pc->position;
   l->label.side=pc->side;
   l->labelname=malloc(sizeof(char)*50);
@@ -292,7 +277,33 @@ listlabels *addlabel(char *name, listlabels *l, pcounter *pc) {
   i=0;
   while(l->labelname[i]!=':') i++;
   l->labelname[i]='\0';
+  //printf("l->labelname foi inserido como %s\n",l->labelname);
   return aux;
+ }
+sprintf(auxname,"%s",name);
+i=0;
+while(auxname[i]!=':') i++;
+auxname[i]='\0';
+while(l->prox!=NULL) {
+  //printf("l->labelname=%s,name=%s\n",l->labelname,auxname);
+  if(!strcmp(l->labelname,auxname)) { //checa repetição
+    //printf("Oia nego tentando inserir repetido soo\n\n");
+    return aux;
+  }
+  l=l->prox;
+ }
+//printf("Vou ter que inserir um label novo mesmo\n");
+l->prox = malloc(sizeof(listlabels));
+l=l->prox;
+l->prox=NULL;
+l->label.position=pc->position;
+l->label.side=pc->side;
+l->labelname=malloc(sizeof(char)*50);
+strcpy(l->labelname,name);
+i=0;
+while(l->labelname[i]!=':') i++;
+l->labelname[i]='\0';
+return aux;
 }
 char *remove_coments(FILE *cod, char *code) { //OK
   int k=100;
@@ -365,9 +376,9 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   while(code[i]!='\0') {
     temptoken[y]=tolower(code[i]); i++; y++;
     if(code[i]==' ' || code[i]==',' || code[i]=='\0' || code[i]=='#') {
-    	if(code[i]=='#') {
-	  line++;
-	}
+      if(code[i]=='#') {
+	line++;
+      }
       temptoken[y] = '\0';
       strcpy(auxtoken,temptoken);
       temptoken = trata_constante(temptoken); //constantes em hexa
@@ -538,7 +549,7 @@ char *trata0b(char *in) {
   strcpy(in,palavra);
   return in;
 }
- label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
+label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
   printf("Recebi o label %s pra tratar\n",in);
   char *labelname;
   labelname=malloc(sizeof(char)*50);
@@ -582,4 +593,22 @@ char *trata0b(char *in) {
     }
   }
   return nextl;
+}
+void printlist (listtokens *l) {
+  listtokens *aux;
+  aux = l;
+  while(aux->prox!=NULL) {
+    printf("Conteudo da lista ->\n    List->tokenname=%s\n    List->tokentype=%c\n    List->tokenline=%d\n",aux->tokenname,aux->tokentype,aux->tokenline);
+    if(aux->prox!=NULL) aux=aux->prox;
+    else break;
+  }
+}
+void printlables (listlabels *l) {
+  listlabels *aux;
+  aux = l;
+  while(1) {
+    printf("List->labelname=%s\n",aux->labelname);
+    if(aux->prox!=NULL) aux=aux->prox;
+    else break;
+  }
 }
