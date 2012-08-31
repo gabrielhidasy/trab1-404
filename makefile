@@ -11,3 +11,7 @@ zip:
 
 megazip:
 	@zip all.zip *
+tudo:
+	make all
+	make zip
+	make megazip

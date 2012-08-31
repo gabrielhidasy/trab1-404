@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   
 }
 void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
-  long long int aux;
+  long long int aux, tkname;
   int err,flag = 0;
   err=l->tokenline;
   if(!strcmp(l->tokenname,".align")) {
@@ -55,12 +55,15 @@ void trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     pc->side=0;
     l=l->prox;
     aux=pc->position;
-    if(pc->position%atoi(l->tokenname)) 
-      pc->position=pc->position+atoi(l->tokenname)-pc->position%atoi(l->tokenname);
+    tkname = strtol(l->tokenname,NULL,16);
+    if(pc->position%tkname) 
+      pc->position=pc->position+tkname-pc->position%tkname;
     printf("aux = %lld, pc->position=%d\n",aux,pc->position);
   }
   if(!strcmp(l->tokenname,".word")) {
-flag = 1;
+    flag = 1;
+    if(pc->side==1) 
+      erro(err,".word desalinhado");
     fprintf(hexa,"%03x ",pc->position);
     l=l->prox;
     fprintf(hexa,"%s\n",l->tokenname);
@@ -72,10 +75,14 @@ flag = 1;
     printf("mudando origem de %X\n",pc->position);
     l=l->prox;
     printf("para %s\n",l->tokenname);
+    if(pc->side==1)
+      fprintf(hexa,"00000\n");
     pc->position=strtoll(l->tokenname,NULL,16);
   }
   if(!strcmp(l->tokenname,".wfill")) {
     flag = 1;
+    if(pc->side==1) 
+      erro(err,".wfill desalinhado");
     l=l->prox;
     int linhas = strtoll(l->tokenname,NULL,16);
     l=l->prox;
@@ -172,6 +179,7 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
       fprintf(hexa,"13%s",nextl->position);
   }
   if(pc->side==0) fprintf(hexa,"\n");
+  //ou é erro
   if(!aux) erro(line,"Operação desconhecida"); 
   return;
 }
@@ -187,17 +195,11 @@ char *remove_coments(FILE *cod, char *code) { //OK
       while(aux!='\n') {
 	fscanf(cod,"%c",&aux);
       } 
-      code[i]='c'; i++;
-      code[i]='o'; i++;
-      code[i]='m'; i++;
-      code[i]='m'; i++;
-      code[i]='e'; i++;
-      code[i]='n'; i++;
-      code[i]='t'; i++;
+      code[i]='!'; i++;
     } 
     if(aux=='\n') aux = '#';
     code[i]=aux; i++;
-    if(i>=k) {
+    if(i>=k-10) {
       k = k*2;
       code = realloc(code,sizeof(char)*k);
     }
@@ -222,7 +224,7 @@ char *remove_double_spaces(char *code) {
     code2[y]=code[i];
     i++;
     y++;
-    if(y>=k) {
+    if(y>=k-10) {
       k=2*k;
       code2 = realloc(code2,sizeof(char)*k);
     }
@@ -267,7 +269,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
       y=0; i++;
       //printf("Adicionando token --%s-- a lista\n",temptoken);
       //adiciona o token a lista
-      if(!strcmp("comment",temptoken)) {
+      if(!strcmp("!",temptoken)) {
 	type = 'z';
       }
       while (l->prox!=NULL) l=l->prox;
