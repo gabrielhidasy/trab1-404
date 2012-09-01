@@ -25,7 +25,7 @@ void erro(int err,char *desc);
 listlabels *addlabel(char *name, listlabels *l, pcounter *pc);
 listtokens *tokenizer(char *codigo, listtokens *l, pcounter pc);
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll);
-listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa);
+listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll);
 char *remove_coments(FILE *cod, char *code);
 char *remove_double_spaces(char *code);
 char *trata_constante(char *temptoken);

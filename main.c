@@ -24,16 +24,15 @@ int main(int argc, char *argv[]) {
   if(!strcmp(l->tokenname,"head")) l=l->prox;
   lb = l;
   while(1) {
-    printlist(l);
-    //printf("%s\n",l->tokenname);
+    //printf("tokenname,%s tokentype %c\n",l->tokenname,l->tokentype);
     if(l->tokentype=='f') {
       if(pc.side==1) fprintf(hexa,"00000");
       //printf("Atingido final do codigo\n");
       break;
     }
     if(l->tokentype=='d') {
-      //printf("Tratarei a diretiva %s\n",l->tokenname);
-      l=trata_diretiva(l,&pc,hexa);
+      printf("Tratarei a diretiva %s\n",l->tokenname);
+      l=trata_diretiva(l,&pc,hexa,ll);
     } 
     if(l->tokentype=='b') {
       printf("Tratarei a operação %s\n",l->tokenname);
@@ -47,9 +46,9 @@ int main(int argc, char *argv[]) {
       l=l->prox;
     else break;
   }
-  printf("--------------------------------------\n");
-  printlables(ll);
-  printf("--------------------------------------\n");
+  /* printf("--------------------------------------\n"); */
+  /* printlables(ll); */
+  /* printf("--------------------------------------\n"); */
   l = lb; //daqui que voltamos a lista original
   rewind(hexa); //vamos re-escrever
   pc.side=0;
@@ -63,11 +62,11 @@ int main(int argc, char *argv[]) {
     } 
     if(l->tokentype=='d') {
       //printf("Tratarei a diretiva %s\n",l->tokenname);
-      l=trata_diretiva(l,&pc,hexa);
+      l=trata_diretiva(l,&pc,hexa,ll);
     }
       
     if(l->tokentype=='b') {
-      printf("Tratarei a operação1 %s\n",l->tokenname);
+      //printf("Tratarei a operação1 %s\n",l->tokenname);
       arithmetics(l,&pc,hexa,ll);
     } 
     if(l->tokentype=='l') {
@@ -83,7 +82,8 @@ int main(int argc, char *argv[]) {
   return 0;
   
 }
-listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
+listtokens *trata_diretiva(listtokens *l, pcounter *pc,
+			   FILE *hexa, listlabels *ll) {
   long long int tkname;
   listtokens *ret = l;
   //int aux;
@@ -104,14 +104,26 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     //printf("aux = %lld, pc->position=%d\n",aux,pc->position);
   }
   if(!strcmp(l->tokenname,".word")) {
-    flag = 1;
     if(pc->side==1) 
       erro(err,".word desalinhado");
-    fprintf(hexa,"%03x ",pc->position);
+    fprintf(hexa,"%03X ",pc->position);
     l=l->prox;
-    fprintf(hexa,"%s\n",l->tokenname);
+    if(l->tokentype=='b') {
+      label *nextl = malloc(sizeof(label));
+      nextl = trataL(l->tokenname,pc,ll,nextl);
+      if(nextl->side==3) {
+	char *invalidop = malloc(sizeof(char)*100);
+	sprintf(invalidop,"Erro desconhecido \"%s\"\n",l->tokenname);
+	erro(l->tokenline,invalidop);
+      }
+      fprintf(hexa,"%010llX\n",strtoll(nextl->position,NULL,16));
+      l=l->prox;
+    }
+    else
+      fprintf(hexa,"%s\n",l->tokenname);
     pc->position++;
     pc->side=0;
+    return l;
   }
   if(!strcmp(l->tokenname,".org")) {
     flag = 1;
@@ -125,7 +137,6 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     pc->position=strtoll(l->tokenname,NULL,16);
   }
   if(!strcmp(l->tokenname,".wfill")) {
-    flag = 1;
     if(pc->side==1) 
       erro(err,".wfill desalinhado");
     l=l->prox;
@@ -134,35 +145,59 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc, FILE *hexa) {
     //como funciona isso com label? ele pega o label e poe como palavra ou
     //printa a palavra referenciada pelo label?
     int count = 0;
-    for(count=0;count<linhas;count++) {
-      fprintf(hexa,"%03x ",pc->position);
-      fprintf(hexa,"%s\n",l->tokenname);
-      pc->position++;
-      pc->side=0;
+    label *nextl = malloc(sizeof(label));
+    if(l->tokentype=='b') {
+      printf("No wfill com LABEL\n");
+      nextl = trataL(l->tokenname,pc,ll,nextl);
+      if(nextl->side==3) {
+	char *invalidop = malloc(sizeof(char)*100);
+	sprintf(invalidop,"Erro desconhecido \"%s\"\n",l->tokenname);
+	erro(l->tokenline,invalidop);
+      }
     }
+    else
+      nextl->position = l->tokenname;
+    for(count=0;count<linhas;count++) {
+      fprintf(hexa,"%03X ",pc->position);
+      fprintf(hexa,"%010llX\n",strtoll(nextl->position,NULL,16));
+      pc->position++;
+      pc->side=0;  
+    }
+    //l=l->prox;
+      return l;
   }
   if(!strcmp(l->tokenname,".set")) {
     flag = 1;
     l=l->prox; 
-    char setin[50];
-    char setout[50];
-    int i=0;
+    char setin[50],setin2[52];
+    char setout[50],setout2[52];
+    int i=0,y=0;
     strcpy(setin,l->tokenname); //um nome
     l=l->prox;
-    strcpy(setout,l->tokenname); //é uma constante
+    strcpy(setout,l->tokenname); //e uma constante
     listtokens *aux;
-    printf("aqui na .set vamos trocar todas as %s por %s\n",setin,setout);
     aux = l;
+    sprintf(setin2,"m(%s)",setin);
+    sprintf(setout2,"m(%s)",setout);
     while(1) {
       if(!strcmp(aux->tokenname,setin)) {
 	strcpy(aux->tokenname,setout);
 	aux->tokentype='c';
 	i++;
       }
+      if(!strcmp(aux->tokenname,setin2)) {
+	while(setout2[y]!='\0') y++;
+	sprintf(aux->tokenname,"m(%c%c%c)",
+		setout2[y-4],setout2[y-3],setout2[y-2]);
+	//printf("\n\n%c%c%c\n\n",setout2[y-4],setout2[y-3],setout2[y-2]);
+	aux->tokentype='m';
+	i++;
+      }
+      //printf("aux->tokename=%s\n",aux->tokenname);
       if(aux->prox!=NULL) aux=aux->prox;
       else break;
     }
-    printf("Troquei %d coisas\n",i);
+    //printf("Troquei %d coisas\n",i);
     return l;
   }
   if(!flag) erro(err,"Diretiva desconhecida"); 
@@ -182,11 +217,27 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
   strcpy(token,l->tokenname);
   if(pc->side==0) {
     pc->side=1;
-    fprintf(hexa,"%03x ",pc->position);
+    fprintf(hexa,"%03X ",pc->position);
   }
   else {
     pc->side=0;
     pc->position++;
+  }
+  //Aqui as que não tem parametro
+  if(!strcmp(token,"loadmq")) { 
+    fprintf(hexa,"0A000"); 
+    if(pc->side==0) fprintf(hexa,"\n"); //ao contrario porque o pc
+    return;                             //muda antes
+  }
+  if(!strcmp(token,"lsh")) { 
+    fprintf(hexa,"14000");
+    if(pc->side==0) fprintf(hexa,"\n");
+    return;
+  }
+  if(!strcmp(token,"rsh")) { 
+    fprintf(hexa,"15000");
+    if(pc->side==0) fprintf(hexa,"\n"); 
+    return;  
   }
   l=l->prox;
   strcpy(auxtoken,l->tokenname);
@@ -205,11 +256,14 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
     erro(line,invalidop);
   }
   //printf("O next vale %s\n",nextl->position);
+  //os que tem um parametro
   if(!strcmp(token,"add")) { 
     fprintf(hexa,"05%s",nextl->position); aux=1;  }
+  if(!strcmp(token,"sub")) { 
+    fprintf(hexa,"06%s",nextl->position); aux=1;  }
   if(!strcmp(token,"addmod")) { 
     fprintf(hexa,"07%s",nextl->position); aux=1;  }
-  if(!strcmp(token,"sub")) { 
+  if(!strcmp(token,"submod")) { 
     fprintf(hexa,"08%s",nextl->position); aux=1;  }
   if(!strcmp(token,"mul")) { 
     fprintf(hexa,"0B%s",nextl->position); aux=1;  }
@@ -225,12 +279,6 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
     fprintf(hexa,"02%s",nextl->position); aux=1;  }
   if(!strcmp(token,"loadmod")) { 
     fprintf(hexa,"03%s",nextl->position); aux=1;  }
-  if(!strcmp(token,"loadmq")) { 
-    fprintf(hexa,"0A%s",nextl->position); aux=1;  }
-  if(!strcmp(token,"lsh")) { 
-    fprintf(hexa,"14%s",nextl->position); aux=1;  }
-  if(!strcmp(token,"rsh")) { 
-    fprintf(hexa,"15%s",nextl->position); aux=1;  }
   //se não for nenhuma dessas, então é das chatas
   if(!strcmp(token,"jump")) {
     aux=1;
@@ -313,6 +361,7 @@ char *remove_coments(FILE *cod, char *code) { //OK
   memset(code,'0',k);
   while(!feof(cod)) {
     fscanf(cod,"%c",&aux);
+    if(aux==',' || aux=='\t') aux=' ';
     if(aux=='@') {
       while(aux!='\n') {
 	fscanf(cod,"%c",&aux);
@@ -366,7 +415,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   strcpy(l->tokenname,"head");
   l->prox=NULL;
   auxlist = l;
-  int i=0,y=0,line=1;
+  int i=0,y=0,z=0,line=1;
   char *temptoken,*auxtoken,type;
   temptoken = malloc(sizeof(char)*50);
   auxtoken = malloc(sizeof(char)*50);
@@ -380,6 +429,13 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
 	line++;
       }
       temptoken[y] = '\0';
+      if(temptoken[0]==' ') {
+	while(temptoken[z]!='\0') {
+	  temptoken[z]=temptoken[z+1];
+	  z++;
+	}
+	z=0;
+      }
       strcpy(auxtoken,temptoken);
       temptoken = trata_constante(temptoken); //constantes em hexa
       type = 'b'; //tipo aleatorio
@@ -428,6 +484,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
 
 char *trata_constante(char *temptoken) {
   int aux;
+  char temptoken2[50];
   if(temptoken[0]=='-') aux = 1;
   else aux = 0;
   if(temptoken[aux]=='0' || temptoken[aux]=='1' || temptoken[aux]=='2' ||
@@ -436,10 +493,9 @@ char *trata_constante(char *temptoken) {
      temptoken[aux]=='9') {
     if(temptoken[aux+1]!='b' && temptoken[aux+1]!='x' 
        && temptoken[aux+1]!='o') {
-      //esse pequeno if acha os decimais
-      //printf("entre nesse megaif com temptoken = %s\n",temptoken);
-      sprintf(temptoken,"%010X",atoi(temptoken));
-      //printf("Saindo com temptoken = %s\n",temptoken);
+      //esse pequeno if acha os base 10
+      sprintf(temptoken2,"%016llX",strtoll(temptoken,NULL,10));
+      sprintf(temptoken,"%s",temptoken2+6);
     }
   }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='o') { 
@@ -508,7 +564,7 @@ char *trata0x(char *in) {
   count--;
   //printf("o magnifico count=%d\n",count);
   for(count2=0;count2<count-1;count2++)
-    palavra[9-count2]=in[count-count2];
+    palavra[9-count2]=toupper(in[count-count2]);
   palavra[10]='\0';
   strcpy(in,palavra);
   return in;
@@ -554,6 +610,7 @@ label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
   char *labelname;
   labelname=malloc(sizeof(char)*50);
   int i=2,y=0;
+  if(in[0]=='m' && in[1]=='(') {
   while(in[i]!=')') {
     if(in[i]=='\0') {
       nextl->side=3;
@@ -565,6 +622,8 @@ label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
   }
   labelname[y]='\0';
   printf("Tirado o m() = %s\n",labelname);
+  }
+  else strcpy(labelname,in);
   listlabels *aux;
   nextl->position = malloc(sizeof(char)*4);
   aux = ll;
@@ -582,7 +641,7 @@ label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
       return nextl;
     }
     else printf("ainda não aux->labelname=%s, labelname=%s\n",
-		aux->labelname,labelname);
+      aux->labelname,labelname);
     if(aux->prox!=NULL)
       aux=aux->prox;
     else {
@@ -597,8 +656,10 @@ label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
 void printlist (listtokens *l) {
   listtokens *aux;
   aux = l;
+  if(aux==NULL) return;
   while(aux->prox!=NULL) {
-    printf("Conteudo da lista ->\n    List->tokenname=%s\n    List->tokentype=%c\n    List->tokenline=%d\n",aux->tokenname,aux->tokentype,aux->tokenline);
+    printf("Conteudo da lista ->\n    List->tokenname=%s\n  List->tokentype=%c\n List->tokenline=%d\n",
+    aux->tokenname,aux->tokentype,aux->tokenline);
     if(aux->prox!=NULL) aux=aux->prox;
     else break;
   }
@@ -606,8 +667,10 @@ void printlist (listtokens *l) {
 void printlables (listlabels *l) {
   listlabels *aux;
   aux = l;
+  if(aux==NULL) return;
   while(1) {
-    printf("List->labelname=%s\n",aux->labelname);
+    printf("List->labelname=%s labelpos=%X labelside=%d\n",
+	   aux->labelname,aux->label.position,aux->label.side);
     if(aux->prox!=NULL) aux=aux->prox;
     else break;
   }
