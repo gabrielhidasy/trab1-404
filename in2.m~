@@ -1,0 +1,7 @@
+ADD M(3)
+labelx:
+ADD M(10)
+.align 1
+.word 64202
+.word -1
+jump m(labelx)

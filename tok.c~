@@ -1,0 +1,56 @@
+#include "main.h"
+char *trata0x(char *in) {
+  int count=0,count2=0;
+  char palavra[11];
+  memset(palavra,'0',10);
+  while(in[count]!='\0') {
+    count++;
+  } 
+  count--;
+  //printf("o magnifico count=%d\n",count);
+  for(count2=0;count2<count-1;count2++)
+    palavra[9-count2]=toupper(in[count-count2]);
+  palavra[10]='\0';
+  strcpy(in,palavra);
+  return in;
+}
+char *trata0o(char *in) {
+  int count=0,count2=0;
+  char palavra[15];
+  long long int octal;
+  memset(palavra,'0',15);
+  while(in[count]!='\0') {
+    count++;
+  } 
+  count--;
+  for(count2=0;count2<count-1;count2++) //o -1 mata o 'o'
+    palavra[13-count2]=in[count-count2];
+  palavra[14]='\0';
+  octal=strtoll(palavra,NULL,8);
+  sprintf(palavra,"%010llX",octal);
+  strcpy(in,palavra);
+  //printf("Recebi %s, fiz o octal %lld, saiu o hexa %s\n",in,octal,palavra);
+  return in;
+}
+char *trata0b(char *in) {
+  int count=0,count2=0,i=0;
+  char palavra[50];
+  long long int binary;
+  memset(palavra,'0',50);
+  while(in[count]!='\0') {
+    count++;
+  } 
+  count--;
+  for(count2=0;count2<count-1;count2++) //o -1 mata o 'o'
+    palavra[48-count2]=in[count-count2];
+  palavra[49]='\0';
+  while(palavra[i]!='\0') {
+    if(palavra[i]!='1' && palavra[i]!='0') erro(-1,"Binary not 0/1");
+    i++;
+  }
+  binary=strtoll(palavra,NULL,2);
+  sprintf(palavra,"%010llX",binary);
+  //printf("%s palavra, %lld binary\n",palavra,binary);
+  strcpy(in,palavra);
+  return in;
+}

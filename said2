@@ -1,0 +1,48 @@
+Conteudo da lista ->
+    List->tokenname=head
+    List->tokentype=º
+    List->tokenline=-1162167622
+Conteudo da lista ->
+    List->tokenname=add
+    List->tokentype=b
+    List->tokenline=1
+Conteudo da lista ->
+    List->tokenname=m(3)
+    List->tokentype=m
+    List->tokenline=2
+Conteudo da lista ->
+    List->tokenname=labelx:
+    List->tokentype=l
+    List->tokenline=3
+Conteudo da lista ->
+    List->tokenname=add
+    List->tokentype=b
+    List->tokenline=3
+Conteudo da lista ->
+    List->tokenname=m(10)
+    List->tokentype=m
+    List->tokenline=4
+Conteudo da lista ->
+    List->tokenname=.align
+    List->tokentype=d
+    List->tokenline=4
+Conteudo da lista ->
+    List->tokenname=0000000001
+    List->tokentype=c
+    List->tokenline=5
+Conteudo da lista ->
+    List->tokenname=.word
+    List->tokentype=d
+    List->tokenline=5
+Conteudo da lista ->
+    List->tokenname=000000FACA
+    List->tokentype=c
+    List->tokenline=6
+Conteudo da lista ->
+    List->tokenname=.word
+    List->tokentype=d
+    List->tokenline=6
+Conteudo da lista ->
+    List->tokenname=00FFFFFFFF
+    List->tokentype=c
+    List->tokenline=6
