@@ -12,6 +12,7 @@ zip:
 megazip:
 	@zip -r all.zip * 
 tudo:
+	./tester.sh
 	make all
 	make zip
 	make megazip
