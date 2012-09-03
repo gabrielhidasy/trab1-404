@@ -125,6 +125,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   strcpy(l->tokenname,"FINAL");
   memset(temptoken,'0',50);
   free(auxtoken);
+  free(temptoken);
   return auxlist;
 }
 
