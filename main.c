@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   while(1) {
     //printf("tokenname,%s tokentype %c\n",l->tokenname,l->tokentype);
     if(l->tokentype=='f') {
-      if(pc.side==1) fprintf(hexa,"00000");
+      if(pc.side==1) fprintf(hexa,"00000\n");
       //printf("Atingido final do codigo\n");
       break;
     }
