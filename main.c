@@ -159,6 +159,7 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc,
       pc->position++;
       pc->side=0;  
     }
+    free(nextl);
     return l;
   }
   if(!strcmp(l->tokenname,".set")) {
@@ -200,13 +201,13 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc,
 
 /* Trata os tokens de instrução */
 void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
-  label *nextl;
+  label *nextl = NULL;
   int line = l->tokenline;
   int aux=0;
-  nextl = malloc(sizeof(label));
-  nextl->side=0;
-  nextl->position=malloc(sizeof(char)*4);
-  strcpy(nextl->position,"500");
+  //nextl = malloc(sizeof(label));
+  //nextl->side=0;
+  //nextl->position=malloc(sizeof(char)*4);
+  //strcpy(nextl->position,"500");
   char token[50],auxtoken[50];
   strcpy(token,l->tokenname);
   if(pc->side==0) {
@@ -297,45 +298,12 @@ void arithmetics(listtokens *l, pcounter *pc, FILE *hexa,listlabels *ll) {
   }
   if(pc->side==0) fprintf(hexa,"\n");
   //ou é erro
-  if(!aux) erro(line,"Operação Desconhecida"); 
+  if(!aux) erro(line,"Operação Desconhecida");
   if(l->prox!=NULL) l=l->prox;
+  free(nextl);
   return;
 }
 /* Trata token do tipo M(X) */
-char *trataM(char *in) {
-  if(in[0]=='m' && in[1]=='(') { //é um if redundante
-    int count=0,count2=2;
-    char *tmptoken,*auxtoken,saida[4];
-    tmptoken = malloc(sizeof(char)*50);
-    auxtoken = malloc(sizeof(char)*50);
-    while(in[count2]!=')') {
-      tmptoken[count]=in[count2];
-      count++;
-      count2++;
-    }
-    //em temptoken temos uma constante
-    //pode ser binaria, hexa, dec, octa, label
-    //temos tratadores para todas
-    tmptoken[count]='\0';
-    strcpy(auxtoken,tmptoken);
-    tmptoken=trata_constante(tmptoken);
-    if(!strcmp(auxtoken,tmptoken)) {
-      strcpy(tmptoken,"500"); //significa que é label
-      return tmptoken;
-    }
-    count=0;
-    while(tmptoken[count]!='\0') {
-      count++;
-    }
-    count--;
-    sprintf(saida,"%c%c%c",tmptoken[count-2],tmptoken[count-1],tmptoken[count]);
-    memset(in,'0',50);
-    strcpy(in,saida);
-    free(tmptoken);
-    return in;
-  } 
-  return NULL;
-}
 
 /* Recebe erros diversos, exibe o erro e sai */
 void erro(int err, char *desc) {
@@ -348,49 +316,6 @@ void erro(int err, char *desc) {
 
 /* Trata os labels e retorna o valor do mesmo  */
 /* se conhecido ou 500 se desconhecido */
-label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
-  //printf("Recebi o label %s pra tratar\n",in);
-  char *labelname;
-  labelname=malloc(sizeof(char)*50);
-  int i=2,y=0;
-  if(in[0]=='m' && in[1]=='(') {
-    //tira o m( e )
-  while(in[i]!=')') {
-    if(in[i]=='\0') {
-      nextl->side=3;
-      return nextl;
-    }
-    labelname[y]=in[i];
-    i++;
-    y++;
-  }
-  labelname[y]='\0';
-  }
-  else strcpy(labelname,in);
-  listlabels *aux;
-  nextl->position = malloc(sizeof(char)*4);
-  aux = ll;
-  if(aux==NULL) {
-    strcpy(nextl->position,"500");
-    nextl->side=pc->side;
-    return nextl;
-  }
-  while(1) {
-    if(!strcmp(aux->labelname,labelname)) {
-      sprintf(nextl->position,"%03X",aux->label.position);
-      nextl->side = aux->label.side;
-      return nextl;
-    }
-    if(aux->prox!=NULL)
-      aux=aux->prox;
-    else {
-      strcpy(nextl->position,"500");
-      nextl->side=1;
-      break;
-    }
-  }
-  return nextl;
-}
 /* Imprime a lista de tokens */
 void printlist (listtokens *l) {
   listtokens *aux;
