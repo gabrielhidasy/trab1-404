@@ -10,7 +10,7 @@ zip:
 	@zip fonte.zip *.c *.h
 
 megazip:
-	@zip all.zip *
+	@zip -r all.zip * 
 tudo:
 	make all
 	make zip
