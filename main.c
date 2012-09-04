@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   pcounter pc;
   pc.position=0;
   pc.side=0;
-  codigo=fopen(argv[1],"r+");
+  codigo=fopen(argv[1],"r");
   if(codigo==NULL) {
     printf("Arquivo de entrada não existe\n");
     return -2;
@@ -80,8 +80,7 @@ int main(int argc, char *argv[]) {
   free(code);
   fclose(codigo);
   fclose(hexa);
-  return 0;
-  
+  return 0; 
 }
 
 /* Recebe o token marcado como diretiva e trata o mesmo */
@@ -142,7 +141,7 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc,
     if(pc->side==1) 
       erro(err,".wfill desalinhado");
     l=l->prox;
-    int linhas = strtoll(l->tokenname,NULL,16);
+    long long int linhas = strtoll(l->tokenname,NULL,16);
     l=l->prox;
     int count = 0;
     label *nextl = malloc(sizeof(label));

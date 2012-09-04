@@ -1,4 +1,5 @@
 #include "main.h"
+/* Remove os comentarios do codigo e marca quebra de linha com #*/
 char *remove_coments(FILE *cod, char *code) { //OK
   int k=100;
   char aux = 0;
@@ -24,7 +25,8 @@ char *remove_coments(FILE *cod, char *code) { //OK
   code[i]='\0';
   code = remove_double_spaces(code);
   return code;
-}       
+}
+/* Remove ocorrencias de espaços duplos */       
 char *remove_double_spaces(char *code) {
   //Remove os espaços duplos e espaços a mais no inicio do arquivo
   int i=0,k=100,y=0;
@@ -55,6 +57,7 @@ char *remove_double_spaces(char *code) {
   free(code2);
   return code;
 }
+/* Gera tokens do codigo com marcação de tipo e linha de origem */
 listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   listtokens *auxlist;
   l = malloc(sizeof(listtokens));
@@ -129,6 +132,7 @@ listtokens *tokenizer(char *code, listtokens *l, pcounter pc) {
   return auxlist;
 }
 
+/* Converte tokens de constantes em strings HEXA de 10 numeros */
 char *trata_constante(char *temptoken) {
   int aux;
   char temptoken2[50];
@@ -137,7 +141,8 @@ char *trata_constante(char *temptoken) {
   if(temptoken[aux]=='0' || temptoken[aux]=='1' || temptoken[aux]=='2' ||
      temptoken[aux]=='3' || temptoken[aux]=='4' || temptoken[aux]=='5' ||
      temptoken[aux]=='6' || temptoken[aux]=='7' || temptoken[aux]=='8' ||
-     temptoken[aux]=='9') {
+     temptoken[aux]=='9') { 
+    /* seria melhor ter usado isDigit() ou temptoken >= 0 && temptoken <= 9 */
     if(temptoken[aux+1]!='b' && temptoken[aux+1]!='x' 
        && temptoken[aux+1]!='o') {
       //esse pequeno if acha os base 10
@@ -149,18 +154,16 @@ char *trata_constante(char *temptoken) {
     //trata octal pra hexa
     //binary e dec pra string
     temptoken=trata0o(temptoken); //hexa sem 0x
-    //printf("out %s\n",temptoken);
-  }
+    }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='x') {
     temptoken=trata0x(temptoken);
-    //printf("out %s\n",temptoken);
-  }
+    }
   if(temptoken[aux]=='0' && temptoken[aux+1]=='b') {
     temptoken=trata0b(temptoken);
-    //printf("out %s\n",temptoken);
-  }
+    }
   return temptoken;
 }
+/* Função auxiliar de tratamento de hexadecimais */
 char *trata0x(char *in) {
   int count=0,count2=0;
   char palavra[11];
@@ -169,13 +172,13 @@ char *trata0x(char *in) {
     count++;
   } 
   count--;
-  //printf("o magnifico count=%d\n",count);
   for(count2=0;count2<count-1;count2++)
     palavra[9-count2]=toupper(in[count-count2]);
   palavra[10]='\0';
   strcpy(in,palavra);
   return in;
 }
+/* Converte octais em hexadecimais */
 char *trata0o(char *in) {
   int count=0,count2=0;
   char palavra[15];
@@ -194,6 +197,7 @@ char *trata0o(char *in) {
   //printf("Recebi %s, fiz o octal %lld, saiu o hexa %s\n",in,octal,palavra);
   return in;
 }
+/* Trata constantes binarias */
 char *trata0b(char *in) {
   int count=0,count2=0,i=0;
   char palavra[50];
@@ -216,6 +220,7 @@ char *trata0b(char *in) {
   strcpy(in,palavra);
   return in;
 }
+/* Converte os tokens M(*) na posição de memoria * */
 char *trataM(char *in) {
   if(in[0]=='m' && in[1]=='(') { //é um if redundante
     int count=0,count2=2;
@@ -253,6 +258,7 @@ char *trataM(char *in) {
   } 
   return NULL;
 }
+/* Devolve a label se conhecida ou "500" se desconhecida */
 label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
   //printf("Recebi o label %s pra tratar\n",in);
   char *labelname;

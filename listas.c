@@ -1,11 +1,10 @@
 #include "main.h"
+/* Adiciona Labels na lista */
 listlabels *addlabel(char *name, listlabels *l, pcounter *pc) {
   listlabels *aux;
   char *auxname = malloc(sizeof(char)*50);
   int i=0;
   aux = l;
-  //printf("Recebi o token %s pra inserir com pc %d (%X)\n",
-  //name,pc->position,pc->position); 
   if(l==NULL) { //não precisa checar repetição, era null
     l = malloc(sizeof(listlabels));
     aux = l;
