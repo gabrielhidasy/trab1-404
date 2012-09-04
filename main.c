@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
   listlabels *llaux;
   while(ll!=NULL) {
     llaux = ll->prox;
+    free(ll->labelname);
     free(ll);
     ll = llaux;
   }
@@ -110,6 +111,7 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc,
     l=l->prox;
     if(l->tokentype=='b') {
       label *nextl = malloc(sizeof(label));
+      nextl->position = NULL;
       nextl = trataL(l->tokenname,pc,ll,nextl);
       if(nextl->side==3) {
 	char *invalidop = malloc(sizeof(char)*100);
@@ -118,6 +120,8 @@ listtokens *trata_diretiva(listtokens *l, pcounter *pc,
       }
       fprintf(hexa,"%010llX\n",strtoll(nextl->position,NULL,16));
       l=l->prox;
+      free(nextl->position);
+      free(nextl);
     }
     else
       fprintf(hexa,"%s\n",l->tokenname);

@@ -234,9 +234,10 @@ char *trataM(char *in) {
     strcpy(auxtoken,tmptoken);
     tmptoken=trata_constante(tmptoken);
     if(!strcmp(auxtoken,tmptoken)) {
-      strcpy(tmptoken,"500"); //significa que é label
+      strcpy(in,"500"); //significa que é label
       free(auxtoken);
-      return tmptoken;
+      free(tmptoken);
+      return in;
     }
     count=0;
     while(tmptoken[count]!='\0') {
@@ -272,7 +273,8 @@ label *trataL(char *in,pcounter *pc,listlabels *ll,label *nextl) {
   }
   else strcpy(labelname,in);
   listlabels *aux;
-  nextl->position = malloc(sizeof(char)*4);
+  if(nextl->position==NULL)
+    nextl->position = malloc(sizeof(char)*4);
   aux = ll;
   if(aux==NULL) {
     strcpy(nextl->position,"500");

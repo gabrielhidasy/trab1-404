@@ -17,7 +17,7 @@ listlabels *addlabel(char *name, listlabels *l, pcounter *pc) {
     i=0;
     while(l->labelname[i]!=':') i++;
     l->labelname[i]='\0';
-    //printf("l->labelname foi inserido como %s\n",l->labelname);
+    free(auxname);
     return aux;
   }
   sprintf(auxname,"%s",name);
@@ -25,14 +25,12 @@ listlabels *addlabel(char *name, listlabels *l, pcounter *pc) {
   while(auxname[i]!=':') i++;
   auxname[i]='\0';
   while(l->prox!=NULL) {
-    //printf("l->labelname=%s,name=%s\n",l->labelname,auxname);
     if(!strcmp(l->labelname,auxname)) { //checa repetição
-      //printf("Oia nego tentando inserir repetido soo\n\n");
+      free(auxname);
       return aux;
     }
     l=l->prox;
   }
-  //printf("Vou ter que inserir um label novo mesmo\n");
   l->prox = malloc(sizeof(listlabels));
   l=l->prox;
   l->prox=NULL;
